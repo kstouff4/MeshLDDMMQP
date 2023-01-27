@@ -1,0 +1,1 @@
+f2py -c -m rg_fort --f90flags=-fopenmp rg_fort.f90 -lgomp

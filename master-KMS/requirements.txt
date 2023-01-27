@@ -1,0 +1,17 @@
+numpy
+scipy
+vtk
+numba
+pyfftw
+matplotlib
+pillow
+scikit-image
+nibabel
+imageio
+h5py
+tqdm
+pandas
+setuptools
+pykeops
+pygalmesh
+meshpy

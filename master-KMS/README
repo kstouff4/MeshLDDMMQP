@@ -1,0 +1,12 @@
+This repository contains Python source code for LDDMM registration
+
+You are welcome to use it, but note that it is provided without guarantee or maintenance commitment. 
+As you can guess, the younes-work branch is my working repository, and as such is completely unreliable. 
+Please only use the master branch, even though it may only be slightly more manageable.
+
+Main repository:
+py-lddmm: python code for image, surface, curve and mesh matching running python 3, using the following packages listed in requirements.txt
+
+To install, just download the code. You can try some of the standalone functions in the Tests directory.
+
+
