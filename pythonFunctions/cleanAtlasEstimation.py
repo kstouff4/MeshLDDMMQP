@@ -1,8 +1,8 @@
 import ntpath
 from numba import jit, prange, int64
 from sys import path as sys_path
-sys_path.append('/cis/home/kstouff4/Documents/MeshRegistration/master/py-lddmm/')
-sys_path.append('/cis/home/kstouff4/Documents/MeshRegistration/master/py-lddmm/base')
+sys_path.append('/cis/home/kstouff4/Documents/MeshRegistration/MeshLDDMMQP/master-KMS/py-lddmm/')
+sys_path.append('/cis/home/kstouff4/Documents/MeshRegistration/MeshLDDMMQP/master-KMS/py-lddmm/base')
 import os
 from base import loggingUtils
 import multiprocessing as mp

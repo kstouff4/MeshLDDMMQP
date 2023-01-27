@@ -16,7 +16,7 @@ do
 done
 
 
-cd /cis/home/kstouff4/Documents/MeshRegistration/
+cd /cis/home/kstouff4/Documents/MeshRegistration/MeshLDDMMQP/pythonFunctions
 #export PYTHON_PATH=/cis/home/kstouff4/Documents/MeshRegistration/Scripts-KMS/approxCode/:$PYTHON_PATH
 
 newV="True" # set to True if using rescaleUnits() function from Younes
@@ -115,6 +115,8 @@ if [[ $nissl == "True" ]]; then
         mkdir $sd
     fi
 
+    sd=$saveDir$prefix"res${res}to${res2}/params${sigmaKernel}$sigmaIm$sigmaDist$sigmaError$ss${thresh}"
+    mkdir $sd
     allen="sl929"
     merfish="210804_15"
     fileTemp="${tempDir}Allen_10_anno_16bit_ap_ax2_${allen}_mesh${res}_rz.vtk"
