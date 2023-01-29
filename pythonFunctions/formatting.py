@@ -1,6 +1,6 @@
 from sys import path as sys_path
-sys_path.append('/cis/home/kstouff4/Documents/MeshRegistration/master/py-lddmm/')
-sys_path.append('/cis/home/kstouff4/Documents/MeshRegistration/master/py-lddmm/base')
+sys_path.append('/cis/home/kstouff4/Documents/MeshRegistration/MeshLDDMMQP/master-KMS/py-lddmm/')
+sys_path.append('/cis/home/kstouff4/Documents/MeshRegistration/MeshLDDMMQP/master-KMS/py-lddmm/base')
 
 from base.meshes import Mesh
 

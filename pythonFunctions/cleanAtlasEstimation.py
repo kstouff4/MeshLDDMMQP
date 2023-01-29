@@ -778,7 +778,9 @@ def solveThetaNonRigidNonProbability(fileTemp,fileTarg,saveDir,diffeo=False,iter
     ftempO.save(sn)
     ftarg.save(saveDir + targTemp.replace(".vtk","_rescaled.vtk"))
     
-    jacFactor = np.mean(ftempO.volumes)
+    ftempO.updateJacobianFactor(ftempO.volumes)
+    ftemp.updateJacobianFactor(ftemp.volumes)
+    #tempVertRescale = np.copy(ftemp.vertices)
     
     # scale vertices of template according to scaleStart (just for optimization purposes)
     # Assume scaleStart is slightly less than where you need to go so that template doesn't set weights to equal zero 
@@ -821,8 +823,8 @@ def solveThetaNonRigidNonProbability(fileTemp,fileTarg,saveDir,diffeo=False,iter
     
     Kdist = Kernel(name='gauss', sigma=sigmaDist)
     
-    vTempO = ftemp.vertices
-    vTargO = ftarg.vertices
+    vTempO = np.copy(ftemp.vertices)
+    vTargO = np.copy(ftarg.vertices)
     
     # KATIE: need to change this portion because nothing can be precomputed since alpha's in atlas are changing??
     # NEVERMIND, alphas are not changing 
@@ -996,6 +998,7 @@ def solveThetaNonRigidNonProbability(fileTemp,fileTarg,saveDir,diffeo=False,iter
     ftempFeat = Mesh(mesh=fileTemp) # create mesh for registration
     ftempFeat.updateWeights(ftemp.weights)
     ftempFeat.updateImage(ftemp.image)
+    ftempFeat.updateVertices(vTempO)
     ftempFeat.save(saveDir + baseTemp.replace(".vtk","_to_") + targTemp.replace(".vtk","_featureMapped" + str(iters) + ".vtk"))
     
     return theta
@@ -1063,6 +1066,9 @@ def solveAtlastoAtlas(fileTemp,fileTarg,saveDir,diffeo=False,iters=1,sigmaKernel
     ftempO.save(sn)
     ftarg.save(saveDir + targTemp.replace(".vtk","_rescaled.vtk"))
     
+    ftemp.updateJacobianFactor(ftempO.volumes)
+    ftempO.updateJacobianFactor(ftempO.volumes)
+    
     # scale vertices of template according to scaleStart (just for optimization purposes)
     # Assume scaleStart is slightly less than where you need to go so that template doesn't set weights to equal zero 
     if (scaleStart < 0):
@@ -1100,8 +1106,8 @@ def solveAtlastoAtlas(fileTemp,fileTarg,saveDir,diffeo=False,iters=1,sigmaKernel
     
     Kdist = Kernel(name='gauss', sigma=sigmaDist)
     
-    vTempO = ftemp.vertices
-    vTargO = ftarg.vertices
+    vTempO = np.copy(ftemp.vertices)
+    vTargO = np.copy(ftarg.vertices)
     
     # KATIE: need to change this portion because nothing can be precomputed since alpha's in atlas are changing??
     # NEVERMIND, alphas are not changing 
@@ -1258,6 +1264,7 @@ def solveAtlastoAtlas(fileTemp,fileTarg,saveDir,diffeo=False,iters=1,sigmaKernel
     ftempFeat = Mesh(mesh=fileTemp) # create mesh for registration
     ftempFeat.updateWeights(ftemp.weights)
     ftempFeat.updateImage(ftemp.image)
+    ftempFeat.updateVertices(vTempO)
     ftempFeat.save(saveDir + baseTemp.replace(".vtk","_to_") + targTemp.replace(".vtk","_featureMapped" + str(iters) + ".vtk"))
     
     return theta

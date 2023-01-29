@@ -408,7 +408,7 @@ class SurfaceMatching(surfaceMatching.SurfaceMatching):
             else:
                 Afft = None
                 A = None
-            at = self.at - update[1] *update[0].diff
+            at = self.at - update[1] *update[0]['diff']
             xt = evol.landmarkDirectEvolutionEuler(self.x0, at*self.ds, self.param.KparDiff, affine=A)
             endPoint = surfaces.Surface(surf=self.fv0)
             endPoint.updateVertices(xt[-1, :, :])

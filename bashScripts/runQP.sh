@@ -102,7 +102,7 @@ if [[ $nissl == "True" ]]; then
     sigmaKernel=0.5
     sigmaError=50000 #400 when thresh is 0
     prefix="AllenToSlideSeqNissl/"
-    saveDir="/cis/home/kstouff4/Documents/MeshRegistration/TestImages/AtlasEstimation/"
+    saveDir="/cis/home/kstouff4/Documents/MeshRegistration/Results/"
     targDir="/cis/home/kstouff4/Documents/MeshRegistration/TestImages/BROAD/Nissl/Gray/"
     tempDir="/cis/home/kstouff4/Documents/MeshRegistration/TestImages/"
 
