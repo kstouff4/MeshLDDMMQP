@@ -234,6 +234,7 @@ def solveQPpiEqualsTheta(A,b,numLabels,numFeats,solver="osqp"):
     fig.savefig('/cis/home/kstouff4/Documents/MeshRegistration/TestImages/AtlasEstimation/P.png',dpi=300)
     '''
     theta = solve_qp(P,np.squeeze(q),A=Anew,b=np.squeeze(bnewnew),G=G,h=lb,solver=solver)
+    theta = solve_qp(P,np.squeeze(q),A=Anew,b=np.squeeze(bnewnew),lb=lb,solver=solver)
     
     print("shape of theta out of solver is " + str(theta.shape))
     print(theta)
@@ -1027,6 +1028,8 @@ def solveAtlastoAtlas(fileTemp,fileTarg,saveDir,diffeo=False,iters=1,sigmaKernel
     
     numLabels = ftemp.imageDim
     numFeats = ftarg.imageDim
+    print("number of labels ", numLabels)
+    print("number of feats ", numFeats)
     
     baseTemp = fileTemp.split("/")[-1]
     targTemp = fileTarg.split("/")[-1]

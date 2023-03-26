@@ -147,12 +147,12 @@ fi
 
 if [[ $atlas == "True" ]]; then
     echo "Computing Atlas Labels and No Densities"
-    sigmaKernel=0.5 #0.15 # 0.01 orriginall 
+    sigmaKernel=1.0# Allen to YS: 0.5 #0.15 # 0.01 orriginall 
     sigmaIm=1.02 # 0.2 original
-    sigmaDist=0.2 # 0.02 original
-    sigmaError=100 #300 #0.5
+    sigmaDist=0.5 # 0.2 # 0.02 original
+    sigmaError=300 # 100 #300 #0.5
     ss=-1
-    rig=1
+    rig=2
     thresh=0
 
     prefix="AtlasToAtlas/"
@@ -166,6 +166,7 @@ if [[ $atlas == "True" ]]; then
     mkdir $sd
     
     sls=("sl479" "sl679" "sl929" "sl889" "sl674" "sl384" "sl484" "sl584")
+    sls=()
     for allen in ${sls[*]}; do
         fileTarg="${tempDir}Allen_10_anno_16bit_ap_ax2_${allen}_mesh${res}_rz.vtk"
         fileTemp="${tempDir}Yongsoo/KimLabDevCCFv001_Annotations_ASL_Oriented_10um_ax0_${allen}_mesh100_rz.vtk"
@@ -176,7 +177,18 @@ if [[ $atlas == "True" ]]; then
         echo $(date) >> $sd/Allen${allen}_to_Yongsoo${allen}_params$sigmaKernel$sigmaIm$sigmaDist$sigmaError$ss$thresh.txt
         python3 -c "import cleanAtlasEstimation as ae; ae.solveAtlastoAtlas('$fileTarg','$fileTemp','$sd',diffeo=True,iters=20,sigmaKernel=$sigmaKernel,sigmaError=$sigmaError,sigmaIm=$sigmaIm,sigmaDist=$sigmaDist,newVer=1e-3,rigOnly=$rig,scaleStart=$ss,thresh=0); quit()" >> $sd/Allen${allen}_to_Yongsoo${allen}_params$sigmaKernel$sigmaIm$sigmaDist$sigmaError$ss$thresh.txt
         echo $(date) >> $sd/Allen${allen}_to_Yongsoo${allen}_params$sigmaKernel$sigmaIm$sigmaDist$sigmaError$ss$thresh.txt
-    done    
+    done
+    allen="sl536"
+    fileTarg="${tempDir}Allen_10_anno_16bit_ap_ax2_${allen}_mesh${res}_rz.vtk"
+    fileTemp="${tempDir}Rat/WHS_SD_rat_atlas_v4_ax1_sl627_mesh100_rz.vtk"
+    echo $(date) >> $sd/Rat_to_Allen_params$sigmaKernel$sigmaIm$sigmaDist$sigmaError$ss$thresh.txt
+    
+    python3 -c "import cleanAtlasEstimation as ae; ae.solveAtlastoAtlas('$fileTemp','$fileTarg','$sd',diffeo=True,iters=10,sigmaKernel=$sigmaKernel,sigmaError=$sigmaError,sigmaIm=$sigmaIm,sigmaDist=$sigmaDist,newVer=1e-3,rigOnly=$rig,scaleStart=$ss,thresh=0); quit()" >> $sd/Rat_to_Allen_params$sigmaKernel$sigmaIm$sigmaDist$sigmaError$ss$thresh.txt
+    echo $(date) >> $sd/Rat_to_Allen_params$sigmaKernel$sigmaIm$sigmaDist$sigmaError$ss$thresh.txt
+    
+    echo $(date) >> $sd/Allen_to_Rat_params$sigmaKernel$sigmaIm$sigmaDist$sigmaError$ss$thresh.txt
+    python3 -c "import cleanAtlasEstimation as ae; ae.solveAtlastoAtlas('$fileTarg','$fileTemp','$sd',diffeo=True,iters=10,sigmaKernel=$sigmaKernel,sigmaError=$sigmaError,sigmaIm=$sigmaIm,sigmaDist=$sigmaDist,newVer=1e-3,rigOnly=$rig,scaleStart=$ss,thresh=0); quit()" >> $sd/Allen_to_Rat_params$sigmaKernel$sigmaIm$sigmaDist$sigmaError$ss$thresh.txt
+    echo $(date) >> $sd/Allen_to_Rat_params$sigmaKernel$sigmaIm$sigmaDist$sigmaError$ss$thresh.txt
 fi
 
 if [[ $geneProbs == "True" ]]; then
