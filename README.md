@@ -40,4 +40,4 @@ Instructions for Use:
   - parameters selected corresponding to those used in preprint to generate output seen in Figures 2 and 3
   - description of each parameter follows each parameter declaration in script
   - output files will be written to ./Results
-  - estimated time to completion on standard (12 GB) GPU is 
+  - estimated time to completion on standard (12 GB) GPU is 2 hours.
