@@ -11,8 +11,8 @@ except:
 
 from math import pi
 import pykeops
-import socket
-pykeops.set_build_folder("~/.cache/keops"+pykeops.__version__ + "_" + (socket.gethostname()))
+#import socket
+#pykeops.set_build_folder("~/.cache/keops"+pykeops.__version__ + "_" + (socket.gethostname()))
 
 
 from pykeops.numpy import Genred, LazyTensor

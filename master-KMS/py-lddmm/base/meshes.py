@@ -960,6 +960,7 @@ class Mesh:
             # self.vertices = V
             self.weights = W
             self.image = IM
+            self.imageDim = self.image.shape[-1]
             #self.faces = np.int_(F)
             self.computeCentersVolumesNormals()
             self.imNames = totNames
@@ -1642,6 +1643,9 @@ def buildMeshFromCentersCountsMinMax(centers, cts, resolution=100, radius = None
     gtype \in {alpha, zeta} --> select faces to keep based on thresholding value of sum(abs(feats)) (zeta) or on weights (alpha)
     '''
     dim = centers.shape[1]
+    print("centers and counts shapes")
+    print(centers.shape)
+    print(cts.shape)
     print("mins " + str(minx) + ", " + str(miny))
     print("maxes " + str(maxx) + ", " + str(maxy))
     if (minx is None or miny is None):
@@ -1684,11 +1688,14 @@ def buildMeshFromCentersCountsMinMax(centers, cts, resolution=100, radius = None
     vert[:,:dim] = tri.points
 
     g = np.zeros((tri.simplices.shape[0], cts.shape[1]))
+    print("g shape, ", g.shape)
+    print("cts shape, ", cts.shape)
     sp = tri.find_simplex(centers)
     wgts = np.zeros(tri.simplices.shape[0])
     nc = np.zeros(tri.simplices.shape[0])
     for k in range(centers.shape[0]):
-        g[sp[k], :] += cts[k, :]
+        print("sp[k] is, ", sp[k])
+        g[sp[k],:] += cts[k,:]
         if (norm == "centers"):
             nc[sp[k]] += 1
         elif (norm == "cts"):

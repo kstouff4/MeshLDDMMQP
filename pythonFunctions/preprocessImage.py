@@ -1,7 +1,7 @@
 import ntpath
 from sys import path as sys_path
-sys_path.append('/cis/home/kstouff4/Documents/MeshRegistration/master/py-lddmm/')
-sys_path.append('/cis/home/kstouff4/Documents/MeshRegistration/master/py-lddmm/base')
+sys_path.append('/cis/home/kstouff4/Documents/MeshRegistration/MeshLDDMMQP/master-KMS/py-lddmm/')
+sys_path.append('/cis/home/kstouff4/Documents/MeshRegistration/MeshLDDMMQP/master-KMS/py-lddmm/base')
 import os
 from base import loggingUtils
 import multiprocessing as mp
@@ -1162,4 +1162,29 @@ def makeGeneSubsetAllenMeshes(dirName,geneFile,saveLoc,num=20):
         fv.updateImNames(gNameSubSort)
         fv.saveVTK(saveLoc + fpref + '_mesh50_rz_probRNA_t10parts.vtk')
     return
+
+def makeBarSeqGeneMesh(npzName,geneName='/cis/home/kstouff4/Documents/SpatialTranscriptomics/BarSeq/Genes/geneList.npz',maxV=114):
+    info = np.load(npzName)
+    geneID = info['nu_X']
+    coords = info['X']
+    saveLoc = npzName.replace('.npz','')
+    print("coords shape, ", coords.shape)
+    
+    geneList = np.load(geneName,allow_pickle=True)
+    gNameSubSort = geneList
+
+    xi = coords[:,0]
+    yi = coords[:,1]
+    cts = np.zeros((coords.shape[0],maxV))
+    cts[np.arange(geneID.shape[0]),(geneID-1).astype(int)] = 1
+    fv = buildMeshFromCentersCountsMinMax(coords[:,0:2], cts, resolution=100, radius = None, weights=np.ones(coords.shape[0]), threshold = 10,minx=np.min(xi)-100,miny=np.min(yi)-100,maxx=np.max(xi)+100,maxy=np.max(yi)+100,norm="cts",gType="alpha")
+    fv.updateImNames(gNameSubSort)
+    fv.saveVTK(saveLoc + '_mesh100_rz_probRNA_t10.vtk')
+    fv = buildMeshFromCentersCountsMinMax(coords[:,0:2], cts, resolution=50, radius = None, weights=np.ones(coords.shape[0]), threshold = 10, minx=np.min(xi)-100,miny=np.min(yi)-100,maxx=np.max(xi)+100,maxy=np.max(yi)+100,norm="cts",gType="alpha")
+    fv.updateImNames(gNameSubSort)
+    fv.saveVTK(saveLoc + '_mesh50_rz_probRNA_t5.vtk')
+    
+    return
+
+    
                  

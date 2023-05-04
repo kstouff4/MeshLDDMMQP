@@ -1,8 +1,8 @@
 import ntpath
 from numba import jit, prange, int64
 from sys import path as sys_path
-sys_path.append('/cis/home/kstouff4/Documents/MeshRegistration/MeshLDDMMQP/master-KMS/py-lddmm/')
-sys_path.append('/cis/home/kstouff4/Documents/MeshRegistration/MeshLDDMMQP/master-KMS/py-lddmm/base')
+sys_path.append('../master-KMS/py-lddmm/')
+sys_path.append('../master-KMS/py-lddmm/base')
 import os
 from base import loggingUtils
 import multiprocessing as mp
@@ -39,8 +39,6 @@ from base.meshMatching import MeshMatching, MeshMatchingParam
 from base.mesh_distances import varifoldNormDef
 
 import pykeops
-import socket
-pykeops.set_build_folder("/cis/home/kstouff4/.cache/keops"+pykeops.__version__ + "_" + (socket.gethostname()))
 from pykeops.numpy import Genred, LazyTensor
 
 plt.ion()
@@ -65,7 +63,7 @@ def getAandBnonRigid(ftemp,ftarg,Kdist,Alpha,cPrimeInc):
     '''
     Values that will be constant: alpha, gammaTarg, Zeta
     '''
-    dtype='float32'
+    dtype='float64'
     # Compute A
     a1 = (ftemp.volumes * ftemp.weights)[:, None] * ftemp.image
     a2 = (ftarg.volumes * ftarg.weights)[:, None] * ftarg.image
@@ -80,7 +78,7 @@ def getAandBnonRigid(ftemp,ftarg,Kdist,Alpha,cPrimeInc):
     return(A_,b_)
 
 def getAandBnonRigidKS(ftemp,ftarg,Kdist,Alpha,cPrimeInc):
-    dtype='float32'
+    dtype='float64'
     gammaTemp = np.squeeze(ftemp.volumes)[...,None]
     GammaK = (gammaTemp@gammaTemp.T)*kernelMatrix(Kdist,ftemp.centers)
     c = Alpha * GammaK
@@ -225,6 +223,10 @@ def solveQPpiEqualsTheta(A,b,numLabels,numFeats,solver="osqp"):
         Anew[r,r*numFeats:(r+1)*numFeats] = 1 # to ensure probability distributions
     
     Anewnew[0:numLabels,:] = Anew
+    
+    P = sp.sparse.csc_matrix(P)
+    G = sp.sparse.csc_matrix(G)
+    Anew = sp.sparse.csc_matrix(Anew)
 
     '''
     # for debugging 
@@ -233,11 +235,20 @@ def solveQPpiEqualsTheta(A,b,numLabels,numFeats,solver="osqp"):
     fig.colorbar(im,ax=ax)
     fig.savefig('/cis/home/kstouff4/Documents/MeshRegistration/TestImages/AtlasEstimation/P.png',dpi=300)
     '''
-    theta = solve_qp(P,np.squeeze(q),A=Anew,b=np.squeeze(bnewnew),G=G,h=lb,solver=solver)
-    theta = solve_qp(P,np.squeeze(q),A=Anew,b=np.squeeze(bnewnew),lb=lb,solver=solver)
+    #theta = solve_qp(P,np.squeeze(q),A=Anew,b=np.squeeze(bnewnew),G=G,h=lb,solver=solver)
+    theta = solve_qp(P,np.squeeze(q),A=Anew,b=np.squeeze(bnewnew),G=G,h=lb,lb=lb,solver=solver,max_iter=100000,eps_abs=1e-5,verbose=True)
     
     print("shape of theta out of solver is " + str(theta.shape))
     print(theta)
+    thetaN = np.reshape(theta,(numLabels,numFeats))
+    print("should equal 1 ", np.sum(thetaN,axis=-1))
+    if (np.sum(theta < 0) > 0):
+        print("changing some values")
+        for i in range(numLabels):
+            thetaN[i,:] = (thetaN[i,:] - np.min(thetaN[i,:]))/(np.max(thetaN[i,:]) - np.min(thetaN[i,:]))
+            thetaN[i,:] = thetaN[i,:]/np.sum(thetaN[i,:])
+            print("sum is ", np.sum(thetaN[i,:]))
+        theta = thetaN
     
     return theta
 
@@ -632,7 +643,7 @@ def solveThetaNonRigid(fileTemp,fileTarg,saveDir,diffeo=False,iters=1,K2="Id",si
             '''
             # update Vertices after estimation
             K1 = Kernel(name='laplacian', sigma = sigmaKernel, order=3)
-            pk_type = 'float32'
+            pk_type = 'float64'
             affineSt = 'none'
 
             sm = MeshMatchingParam(timeStep=0.1, algorithm='bfgs', KparDiff=K1, KparDist=('gauss', sigmaDist),
@@ -640,7 +651,7 @@ def solveThetaNonRigid(fileTemp,fileTarg,saveDir,diffeo=False,iters=1,K2="Id",si
             sm.KparDiff.pk_dtype = pk_type
             sm.KparDist.pk_dtype = pk_type
             sm.KparIm.pk_type = pk_type
-            f = MeshMatching(Template=ftemp, Target=ftarg, outputDir='/cis/home/kstouff4/Documents/MeshRegistration/TestImages/AtlasEstimation/'+saveTemp+'_'+saveTarg+'affine' + affineSt + '/',param=sm,
+            f = MeshMatching(Template=ftemp, Target=ftarg, outputDir='../Results/LDDMM_Output/'+saveTemp+'_'+saveTarg+'affine' + affineSt + '/',param=sm,
                     testGradient=False,  maxIter=200,
                  affine=affineSt, rotWeight=.01, transWeight = 100.,
                     scaleWeight=10., affineWeight=10.)
@@ -930,7 +941,7 @@ def solveThetaNonRigidNonProbability(fileTemp,fileTarg,saveDir,diffeo=False,iter
             # update Vertices after estimation
             if i == rigOnly:
                 K1 = Kernel(name='laplacian', sigma = sigmaKernel, order=3)
-                pk_type = 'float32'
+                pk_type = 'float64'
                 affineSt = 'none'
 
                 sm = MeshMatchingParam(timeStep=0.1, algorithm='bfgs', KparDiff=K1, KparDist=('gauss', sigmaDist),
@@ -938,7 +949,7 @@ def solveThetaNonRigidNonProbability(fileTemp,fileTarg,saveDir,diffeo=False,iter
                 sm.KparDiff.pk_dtype = pk_type
                 sm.KparDist.pk_dtype = pk_type
                 sm.KparIm.pk_type = pk_type
-                f = MeshMatching(Template=ftemp, Target=ftarg, outputDir='/cis/home/kstouff4/Documents/MeshRegistration/TestImages/AtlasEstimation/'+saveTemp+'_'+saveTarg+'affine' + affineSt + '/',param=sm,
+                f = MeshMatching(Template=ftemp, Target=ftarg, outputDir='../Results/LDDMM_Output/'+saveTemp+'_'+saveTarg+'affine' + affineSt + '/',param=sm,
                         testGradient=False,  maxIter=200,
                      affine=affineSt, rotWeight=.01, transWeight = 100.,
                         scaleWeight=10., affineWeight=10.)
@@ -1109,6 +1120,7 @@ def solveAtlastoAtlas(fileTemp,fileTarg,saveDir,diffeo=False,iters=1,sigmaKernel
     
     Kdist = Kernel(name='gauss', sigma=sigmaDist)
     
+    vTempOO = np.copy(ftemp.vertices)
     vTempO = np.copy(ftemp.vertices)
     vTargO = np.copy(ftarg.vertices)
     
@@ -1202,7 +1214,7 @@ def solveAtlastoAtlas(fileTemp,fileTarg,saveDir,diffeo=False,iters=1,sigmaKernel
             # update Vertices after estimation
             if i == rigOnly:
                 K1 = Kernel(name='laplacian', sigma = sigmaKernel, order=3)
-                pk_type = 'float32'
+                pk_type = 'float64'
                 affineSt = 'none'
 
                 sm = MeshMatchingParam(timeStep=0.1, algorithm='bfgs', KparDiff=K1, KparDist=('gauss', sigmaDist),
@@ -1210,7 +1222,7 @@ def solveAtlastoAtlas(fileTemp,fileTarg,saveDir,diffeo=False,iters=1,sigmaKernel
                 sm.KparDiff.pk_dtype = pk_type
                 sm.KparDist.pk_dtype = pk_type
                 sm.KparIm.pk_type = pk_type
-                f = MeshMatching(Template=ftemp, Target=ftarg, outputDir='/cis/home/kstouff4/Documents/MeshRegistration/TestImages/AtlasEstimation/'+saveTemp+'_'+saveTarg+'affine' + affineSt + '/',param=sm,
+                f = MeshMatching(Template=ftemp, Target=ftarg, outputDir='../Results/LDDMM_Output/'+saveTemp+'_'+saveTarg+'affine' + affineSt + '/',param=sm,
                         testGradient=False,  maxIter=200,
                      affine=affineSt, rotWeight=.01, transWeight = 100.,
                         scaleWeight=10., affineWeight=10.)
@@ -1267,7 +1279,7 @@ def solveAtlastoAtlas(fileTemp,fileTarg,saveDir,diffeo=False,iters=1,sigmaKernel
     ftempFeat = Mesh(mesh=fileTemp) # create mesh for registration
     ftempFeat.updateWeights(ftemp.weights)
     ftempFeat.updateImage(ftemp.image)
-    ftempFeat.updateVertices(vTempO)
+    ftempFeat.updateVertices(vTempOO)
     ftempFeat.save(saveDir + baseTemp.replace(".vtk","_to_") + targTemp.replace(".vtk","_featureMapped" + str(iters) + ".vtk"))
     
     return theta
